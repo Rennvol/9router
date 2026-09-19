@@ -41,7 +41,9 @@ export function parseModel(modelStr) {
     const firstSlash = modelStr.indexOf("/");
     const providerOrAlias = modelStr.slice(0, firstSlash);
     const model = modelStr.slice(firstSlash + 1);
-    const provider = resolveProviderAlias(providerOrAlias);
+    let provider = resolveProviderAlias(providerOrAlias);
+    // ponytail: antigravity muse-spark → opencode (parity Go #15, one provider owns the model; add when more cross-provider aliases appear)
+    if ((provider === "antigravity" || providerOrAlias === "ag") && model.includes("muse-spark")) provider = "opencode";
     return { provider, model, isAlias: false, providerAlias: providerOrAlias };
   }
 
