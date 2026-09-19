@@ -98,7 +98,7 @@ const RESPONSES_MODELS = new Set([
   "muse-spark-1.2-contributor-free",
   "muse-spark-1.3-contributor-free",
 ]);
-const MESSAGES_MODELS = new Set(["union-alpha"]);
+const MESSAGES_MODELS = new Set([]); // ponytail: union-alpha removed 2026-09-19, drop set when Messages path unused
 
 let lastTimestamp = 0;
 let counter = 0;
@@ -499,9 +499,12 @@ export class OpenCodeExecutor extends BaseExecutor {
       body.store = false;
       normalizeResponsesTools(body);
       sanitizeResponsesItems(body);
-      if (!Array.isArray(body.tools) || body.tools.length === 0) {
-        cloakOpencodeTools(body, true);
-      }
+      // Free tier gates on both 'bash' and 'read' being present in the tools
+      // payload (verified live: any Responses request without both returns 403
+      // FreeTierError "can only be used from within OpenCode", with both +
+      // tool_choice auto it returns 200). Cloak on every request, not just
+      // empty ones, so external clients sending 1..N tools still pass.
+      cloakOpencodeTools(body, true);
     } else if (body && typeof body === "object") {
       cloakOpencodeTools(body, false);
     }
